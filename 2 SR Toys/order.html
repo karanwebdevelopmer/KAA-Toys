@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="hi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Now - SR Toys</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="logo">
+                <img src="image/ChatGPT Image Jul 24, 2026, 10_37_42 PM.png" alt="SR Toys Logo">
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="products.html">Products</a></li>
+                    <li><a href="about.html">About Us</a></li>
+                    <li><a href="order.html" class="active">Order Now</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Contact Buttons -->
+    <div class="floating-contact">
+        <a href="https://wa.me/919288491546" class="whatsapp-btn" target="_blank">
+            <i class="fab fa-whatsapp"></i>
+        </a>
+        <a href="tel:+919288491546" class="call-btn">
+            <i class="fas fa-phone"></i>
+        </a>
+    </div>
+
+    <!-- Order Form Section -->
+    <section class="order-section">
+        <div class="container">
+            <h1>Place Your Order</h1>
+            <p class="section-subtitle">Apni details fill karein aur hum jaldi contact karenge</p>
+
+            <div class="order-form-container">
+                <form id="orderForm" class="order-form">
+                    <div class="form-group">
+                        <label for="name"><i class="fas fa-user"></i> Your Name *</label>
+                        <input type="text" id="name" name="name" placeholder="Apna naam enter karein" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mobile"><i class="fas fa-phone"></i> Mobile Number *</label>
+                        <input type="tel" id="mobile" name="mobile" placeholder="10 digit mobile number" pattern="[0-9]{10}" required>
+                    </div>
+
+
+
+                    <div class="form-group">
+                        <label for="address"><i class="fas fa-map-marker-alt"></i> Delivery Address *</label>
+                        <textarea id="address" name="address" rows="3" placeholder="Complete delivery address with pincode" required></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="city"><i class="fas fa-city"></i> City *</label>
+                            <input type="text" id="city" name="city" placeholder="City" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="pincode"><i class="fas fa-mail-bulk"></i> Pincode *</label>
+                            <input type="text" id="pincode" name="pincode" placeholder="Pincode" pattern="[0-9]{6}" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="state"><i class="fas fa-map"></i> State *</label>
+                        <select id="state" name="state" required>
+                            <option value="">Select State</option>
+                            <option value="Andhra Pradesh">Andhra Pradesh</option>
+                            <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                            <option value="Assam">Assam</option>
+                            <option value="Bihar">Bihar</option>
+                            <option value="Chhattisgarh">Chhattisgarh</option>
+                            <option value="Goa">Goa</option>
+                            <option value="Gujarat">Gujarat</option>
+                            <option value="Haryana">Haryana</option>
+                            <option value="Himachal Pradesh">Himachal Pradesh</option>
+                            <option value="Jharkhand">Jharkhand</option>
+                            <option value="Karnataka">Karnataka</option>
+                            <option value="Kerala">Kerala</option>
+                            <option value="Madhya Pradesh">Madhya Pradesh</option>
+                            <option value="Maharashtra">Maharashtra</option>
+                            <option value="Manipur">Manipur</option>
+                            <option value="Meghalaya">Meghalaya</option>
+                            <option value="Mizoram">Mizoram</option>
+                            <option value="Nagaland">Nagaland</option>
+                            <option value="Odisha">Odisha</option>
+                            <option value="Punjab">Punjab</option>
+                            <option value="Rajasthan">Rajasthan</option>
+                            <option value="Sikkim">Sikkim</option>
+                            <option value="Tamil Nadu">Tamil Nadu</option>
+                            <option value="Telangana">Telangana</option>
+                            <option value="Tripura">Tripura</option>
+                            <option value="Uttar Pradesh">Uttar Pradesh</option>
+                            <option value="Uttarakhand">Uttarakhand</option>
+                            <option value="West Bengal">West Bengal</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="product"><i class="fas fa-box"></i> Product Name *</label>
+                        <input type="text" id="product" name="product" placeholder="Product name and price (e.g., Teddy Bear - ₹499)" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="quantity"><i class="fas fa-sort-numeric-up"></i> Quantity *</label>
+                        <input type="number" id="quantity" name="quantity" min="1" value="1" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="paymentMethod"><i class="fas fa-credit-card"></i> Payment Method *</label>
+                        <select id="paymentMethod" name="paymentMethod" required>
+                            <option value="">Select Payment Method</option>
+                            <option value="COD">Cash on Delivery (COD)</option>
+                            <option value="Online">Online Payment (UPI/Card)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="message"><i class="fas fa-comment"></i> Additional Message</label>
+                        <textarea id="message" name="message" rows="3" placeholder="Koi special request ya message?"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="orderDate"><i class="fas fa-calendar"></i> Order Date</label>
+                        <input type="date" id="orderDate" name="orderDate" readonly>
+                    </div>
+
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-paper-plane"></i> Submit Order
+                    </button>
+                </form>
+
+                <div id="successMessage" class="success-message" style="display: none;">
+                    <i class="fas fa-check-circle"></i>
+                    <h3>Order Successfully Placed!</h3>
+                    <p>Thank you! Hum jaldi hi aapse contact karenge.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>SR Toys</h3>
+                    <p>Play, Learn & Grow</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Contact Us</h3>
+                    <p><i class="fas fa-phone"></i> +91 9288491546</p>
+                    <p><i class="fab fa-whatsapp"></i> WhatsApp Available</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="products.html">Products</a></li>
+                        <li><a href="about.html">About Us</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 SR Toys. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module">
+        // Import Firebase SDKs
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBftHnG49-KBBlq5NlMomKnCmH9kuE75O8",
+            authDomain: "sr-toys-53640.firebaseapp.com",
+            databaseURL: "https://sr-toys-53640-default-rtdb.firebaseio.com",
+            projectId: "sr-toys-53640",
+            storageBucket: "sr-toys-53640.firebasestorage.app",
+            messagingSenderId: "33173355522",
+            appId: "1:33173355522:web:6cdf03b54f91a58439fb1b",
+            measurementId: "G-V8XH0HVNVQ"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const database = getDatabase(app);
+
+        // Set current date
+        document.getElementById('orderDate').valueAsDate = new Date();
+
+        // Product selection removed - use direct text input for product name and price
+
+        // Handle form submission
+        document.getElementById('orderForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Get form data
+            const selectedProduct = document.getElementById('product').value;
+
+            const formData = {
+                name: document.getElementById('name').value,
+                mobile: document.getElementById('mobile').value,
+                address: document.getElementById('address').value,
+                city: document.getElementById('city').value,
+                pincode: document.getElementById('pincode').value,
+                state: document.getElementById('state').value,
+                product: selectedProduct,
+                quantity: document.getElementById('quantity').value,
+                paymentMethod: document.getElementById('paymentMethod').value,
+                message: document.getElementById('message').value,
+                orderDate: document.getElementById('orderDate').value,
+                timestamp: new Date().toISOString(),
+                status: 'Pending'
+            };
+
+            // Save to Firebase
+            const ordersRef = ref(database, 'orders');
+            const newOrderRef = push(ordersRef);
+            
+            set(newOrderRef, formData)
+                .then(() => {
+                    // Show success message
+                    document.getElementById('orderForm').style.display = 'none';
+                    document.getElementById('successMessage').style.display = 'block';
+                    
+                    // Reset form
+                    document.getElementById('orderForm').reset();
+                    
+                    // Scroll to success message
+                    document.getElementById('successMessage').scrollIntoView({ behavior: 'smooth' });
+                })
+                .catch((error) => {
+                    alert('Error: ' + error.message);
+                });
+        });
+    </script>
+</body>
+
+</html>
