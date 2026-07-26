@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="hi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - KAA Toys</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+    <!-- Admin Login Section -->
+    <div id="loginSection" class="admin-login">
+        <div class="login-container">
+            <div class="login-logo">
+                <img src="image/file_0000000039387208a44780fb88d694e3.png" alt="KAA Toys Logo">
+                <h2>Admin Login</h2>
+            </div>
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> Username</label>
+                    <input type="text" id="adminUsername" placeholder="Enter username" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-lock"></i> Password</label>
+                    <input type="password" id="adminPassword" placeholder="Enter password" required>
+                </div>
+                <button type="submit" class="login-btn">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="adminPanel" style="display: none;">
+        <!-- Header -->
+        <header class="admin-header">
+            <div class="container">
+                <div class="logo">
+                    <img src="image/file_0000000039387208a44780fb88d694e3.png" alt="KAA Toys Logo">
+                    <span>Admin Panel</span>
+                </div>
+                <button id="logoutBtn" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </header>
+
+        <!-- Admin Navigation -->
+        <div class="admin-nav">
+            <button class="tab-btn active" data-tab="dashboard">
+                <i class="fas fa-chart-line"></i> Dashboard
+            </button>
+            <button class="tab-btn" data-tab="products">
+                <i class="fas fa-box"></i> Products
+            </button>
+            <button class="tab-btn" data-tab="orders">
+                <i class="fas fa-shopping-cart"></i> Orders
+            </button>
+            <button class="tab-btn" data-tab="settings">
+                <i class="fas fa-cog"></i> Settings
+            </button>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="admin-content active">
+            <div class="container">
+                <h1>Dashboard</h1>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <i class="fas fa-shopping-cart"></i>
+                        <div class="stat-info">
+                            <h3 id="totalOrders">0</h3>
+                            <p>Total Orders</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-clock"></i>
+                        <div class="stat-info">
+                            <h3 id="pendingOrders">0</h3>
+                            <p>Pending Orders</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-box"></i>
+                        <div class="stat-info">
+                            <h3 id="totalProducts">0</h3>
+                            <p>Total Products</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <div class="stat-info">
+                            <h3 id="outOfStock">0</h3>
+                            <p>Out of Stock</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products Tab -->
+        <div id="products" class="admin-content">
+            <div class="container">
+                <div class="section-header">
+                    <h1>Manage Products</h1>
+                    <button id="addProductBtn" class="btn-primary">
+                        <i class="fas fa-plus"></i> Add New Product
+                    </button>
+                </div>
+
+                <div id="productsList" class="products-table-container">
+                    <!-- Products will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders Tab -->
+        <div id="orders" class="admin-content">
+            <div class="container">
+                <h1>Manage Orders</h1>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-filter="all">All Orders</button>
+                    <button class="filter-btn" data-filter="Pending">Pending</button>
+                    <button class="filter-btn" data-filter="Processing">Processing</button>
+                    <button class="filter-btn" data-filter="Completed">Completed</button>
+                    <button class="filter-btn" data-filter="Cancelled">Cancelled</button>
+                </div>
+                <div id="ordersList" class="orders-table-container">
+                    <!-- Orders will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="settings" class="admin-content">
+            <div class="container">
+                <h1>Settings</h1>
+                <div class="settings-container">
+                    <div class="settings-card">
+                        <h3><i class="fas fa-key"></i> Change Password</h3>
+                        <form id="changePasswordForm">
+                            <div class="form-group">
+                                <label>Current Password</label>
+                                <input type="password" id="currentPassword" required>
+                            </div>
+                            <div class="form-group">
+                                <label>New Password</label>
+                                <input type="password" id="newPassword" required>
+                            </div>
+                            <button type="submit" class="btn-primary">Update Password</button>
+                        </form>
+                    </div>
+                    <div class="settings-card">
+                        <h3><i class="fas fa-database"></i> Database Actions</h3>
+                        <button class="btn-secondary" onclick="exportData()">
+                            <i class="fas fa-download"></i> Export All Data
+                        </button>
+                        <button class="btn-danger" onclick="confirmClearOrders()">
+                            <i class="fas fa-trash"></i> Clear Old Orders
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Product Modal -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="modalTitle">Add New Product</h2>
+            <form id="productForm">
+                <input type="hidden" id="productId">
+                <div class="form-group">
+                    <label>Product Name *</label>
+                    <input type="text" id="productName" required>
+                </div>
+                <div class="form-group">
+                    <label>Description *</label>
+                    <textarea id="productDescription" rows="3" required></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Price (₹) *</label>
+                        <input type="number" id="productPrice" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Stock Status *</label>
+                        <select id="productStock" required>
+                            <option value="In Stock">In Stock</option>
+                            <option value="Out of Stock">Out of Stock</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Product Image</label>
+                    <input type="file" id="productImage" accept="image/*">
+                    <small>Upload product image (JPG, PNG). If no image, icon will be used.</small>
+                </div>
+                <div class="form-group">
+                    <label>Icon (Font Awesome class)</label>
+                    <input type="text" id="productIcon" placeholder="fas fa-palette" value="fas fa-box">
+                    <small>Backup icon if image not available</small>
+                </div>
+                <div id="imagePreview" style="margin: 15px 0; display: none;">
+                    <img id="previewImg" style="max-width: 200px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.2);">
+                </div>
+                <div class="form-buttons">
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-save"></i> Save Product
+                    </button>
+                    <button type="button" class="btn-secondary" onclick="closeProductModal()">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Order Details Modal -->
+    <div id="orderModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeOrderModal()">&times;</span>
+            <h2>Order Details</h2>
+            <div id="orderDetails"></div>
+        </div>
+    </div>
+
+    <!-- Firebase & Admin Script -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue, push, set, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBftHnG49-KBBlq5NlMomKnCmH9kuE75O8",
+            authDomain: "sr-toys-53640.firebaseapp.com",
+            databaseURL: "https://sr-toys-53640-default-rtdb.firebaseio.com",
+            projectId: "sr-toys-53640",
+            storageBucket: "sr-toys-53640.firebasestorage.app",
+            messagingSenderId: "33173355522",
+            appId: "1:33173355522:web:6cdf03b54f91a58439fb1b",
+            measurementId: "G-V8XH0HVNVQ"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Login functionality
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('adminUsername').value;
+            const password = document.getElementById('adminPassword').value;
+            
+            if (username === 'karan' && password === 'karan129') {
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('adminPanel').style.display = 'block';
+                loadDashboard();
+                loadProducts();
+                loadOrders();
+            } else {
+                alert('Invalid username or password!');
+            }
+        });
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            document.getElementById('loginSection').style.display = 'flex';
+            document.getElementById('adminPanel').style.display = 'none';
+            document.getElementById('loginForm').reset();
+        });
+
+        // Tab switching
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.admin-content').forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById(this.dataset.tab).classList.add('active');
+            });
+        });
+
+        // Load Dashboard Stats
+        function loadDashboard() {
+            onValue(ref(database, 'orders'), (snapshot) => {
+                const orders = snapshot.val();
+                let total = 0, pending = 0;
+                if (orders) {
+                    Object.values(orders).forEach(order => {
+                        total++;
+                        if (order.status === 'Pending') pending++;
+                    });
+                }
+                document.getElementById('totalOrders').textContent = total;
+                document.getElementById('pendingOrders').textContent = pending;
+            });
+
+            onValue(ref(database, 'products'), (snapshot) => {
+                const products = snapshot.val();
+                let total = 0, outOfStock = 0;
+                if (products) {
+                    Object.values(products).forEach(product => {
+                        total++;
+                        if (product.stock === 'Out of Stock') outOfStock++;
+                    });
+                }
+                document.getElementById('totalProducts').textContent = total;
+                document.getElementById('outOfStock').textContent = outOfStock;
+            });
+        }
+
+        // Load Products
+        function loadProducts() {
+            onValue(ref(database, 'products'), (snapshot) => {
+                const products = snapshot.val();
+                let html = '<table class="data-table"><thead><tr><th>Name</th><th>Description</th><th>Price</th><th>Stock</th><th>Actions</th></tr></thead><tbody>';
+                
+                if (products) {
+                    Object.entries(products).forEach(([id, product]) => {
+                        const stockClass = product.stock === 'Out of Stock' ? 'out-of-stock' : 'in-stock';
+                        const displayImage = product.image ? 
+                            `<img src="${product.image}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 5px; margin-right: 8px; vertical-align: middle;">` : 
+                            `<i class="${product.icon}"></i>`;
+                        html += `
+                            <tr>
+                                <td>${displayImage} ${product.name}</td>
+                                <td>${product.description.substring(0, 50)}...</td>
+                                <td>₹${product.price}</td>
+                                <td><span class="status-badge ${stockClass}">${product.stock}</span></td>
+                                <td>
+                                    <button class="btn-icon" onclick="window.editProduct('${id}', ${JSON.stringify(product).replace(/"/g, '&quot;')})">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn-icon btn-danger" onclick="window.deleteProduct('${id}', '${product.name}')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                } else {
+                    html += '<tr><td colspan="5" style="text-align: center;">No products found</td></tr>';
+                }
+                
+                html += '</tbody></table>';
+                document.getElementById('productsList').innerHTML = html;
+            });
+        }
+
+        // Load Orders
+        let currentFilter = 'all';
+        function loadOrders(filter = 'all') {
+            currentFilter = filter;
+            onValue(ref(database, 'orders'), (snapshot) => {
+                const orders = snapshot.val();
+                let html = '<table class="data-table"><thead><tr><th>Order ID</th><th>Customer</th><th>Product</th><th>Mobile</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
+                
+                if (orders) {
+                    Object.entries(orders).forEach(([id, order]) => {
+                        if (filter === 'all' || order.status === filter) {
+                            const shortId = id.substring(0, 8);
+                            html += `
+                                <tr>
+                                    <td>${shortId}</td>
+                                    <td>${order.name}</td>
+                                    <td>${order.product}</td>
+                                    <td>${order.mobile}</td>
+                                    <td>${order.orderDate || 'N/A'}</td>
+                                    <td>
+                                        <select class="status-select" onchange="window.updateOrderStatus('${id}', this.value)">
+                                            <option value="Pending" ${order.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                                            <option value="Processing" ${order.status === 'Processing' ? 'selected' : ''}>Processing</option>
+                                            <option value="Completed" ${order.status === 'Completed' ? 'selected' : ''}>Completed</option>
+                                            <option value="Cancelled" ${order.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <button class="btn-icon" onclick="window.viewOrder('${id}', ${JSON.stringify(order).replace(/"/g, '&quot;')})">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn-icon btn-danger" onclick="window.deleteOrder('${id}')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            `;
+                        }
+                    });
+                } else {
+                    html += '<tr><td colspan="7" style="text-align: center;">No orders found</td></tr>';
+                }
+                
+                html += '</tbody></table>';
+                document.getElementById('ordersList').innerHTML = html;
+            });
+        }
+
+        // Filter buttons
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                loadOrders(this.dataset.filter);
+            });
+        });
+
+        // Add Product Modal
+        document.getElementById('addProductBtn').addEventListener('click', function() {
+            document.getElementById('modalTitle').textContent = 'Add New Product';
+            document.getElementById('productForm').reset();
+            document.getElementById('productId').value = '';
+            document.getElementById('productModal').style.display = 'block';
+        });
+
+        // Image preview
+        document.getElementById('productImage').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('previewImg').src = e.target.result;
+                    document.getElementById('imagePreview').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Product Form Submit
+        document.getElementById('productForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const productId = document.getElementById('productId').value;
+            const imageFile = document.getElementById('productImage').files[0];
+
+            const productData = {
+                name: document.getElementById('productName').value,
+                description: document.getElementById('productDescription').value,
+                price: document.getElementById('productPrice').value,
+                stock: document.getElementById('productStock').value,
+                icon: document.getElementById('productIcon').value
+            };
+
+            if (imageFile) {
+                // Convert image to base64
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    productData.image = e.target.result;
+                    saveProduct(productId, productData);
+                };
+                reader.readAsDataURL(imageFile);
+            } else {
+                saveProduct(productId, productData);
+            }
+        });
+
+        function saveProduct(productId, productData) {
+            if (productId) {
+                update(ref(database, 'products/' + productId), productData)
+                    .then(() => {
+                        alert('Product updated successfully!');
+                        closeProductModal();
+                    });
+            } else {
+                const newProductRef = push(ref(database, 'products'));
+                set(newProductRef, productData)
+                    .then(() => {
+                        alert('Product added successfully!');
+                        closeProductModal();
+                    });
+            }
+        }
+
+        // Global functions
+        window.editProduct = function(id, product) {
+            document.getElementById('modalTitle').textContent = 'Edit Product';
+            document.getElementById('productId').value = id;
+            document.getElementById('productName').value = product.name;
+            document.getElementById('productDescription').value = product.description;
+            document.getElementById('productPrice').value = product.price;
+            document.getElementById('productStock').value = product.stock;
+            document.getElementById('productIcon').value = product.icon || 'fas fa-box';
+            
+            if (product.image) {
+                document.getElementById('previewImg').src = product.image;
+                document.getElementById('imagePreview').style.display = 'block';
+            } else {
+                document.getElementById('imagePreview').style.display = 'none';
+            }
+            
+            document.getElementById('productModal').style.display = 'block';
+        };
+
+        window.deleteProduct = function(id, name) {
+            if (confirm(`Are you sure you want to delete "${name}"?`)) {
+                remove(ref(database, 'products/' + id))
+                    .then(() => alert('Product deleted successfully!'));
+            }
+        };
+
+        window.updateOrderStatus = function(id, status) {
+            update(ref(database, 'orders/' + id), { status: status });
+        };
+
+        window.viewOrder = function(id, order) {
+            const html = `
+                <div class="order-detail-grid">
+                    <div><strong>Order ID:</strong> ${id.substring(0, 8)}</div>
+                    <div><strong>Customer Name:</strong> ${order.name}</div>
+                    <div><strong>Mobile:</strong> ${order.mobile}</div>
+                    <div><strong>Address:</strong> ${order.address}</div>
+                    <div><strong>City:</strong> ${order.city}</div>
+                    <div><strong>State:</strong> ${order.state}</div>
+                    <div><strong>Pincode:</strong> ${order.pincode}</div>
+                    <div><strong>Product:</strong> ${order.product}</div>
+                    <div><strong>Quantity:</strong> ${order.quantity}</div>
+                    <div><strong>Payment Method:</strong> ${order.paymentMethod}</div>
+                    <div><strong>Status:</strong> ${order.status}</div>
+                    <div><strong>Order Date:</strong> ${order.orderDate}</div>
+                    ${order.message ? `<div style="grid-column: 1/-1;"><strong>Message:</strong> ${order.message}</div>` : ''}
+                </div>
+            `;
+            document.getElementById('orderDetails').innerHTML = html;
+            document.getElementById('orderModal').style.display = 'block';
+        };
+
+        window.deleteOrder = function(id) {
+            if (confirm('Are you sure you want to delete this order?')) {
+                remove(ref(database, 'orders/' + id))
+                    .then(() => alert('Order deleted successfully!'));
+            }
+        };
+
+        window.closeProductModal = function() {
+            document.getElementById('productModal').style.display = 'none';
+            document.getElementById('imagePreview').style.display = 'none';
+            document.getElementById('productImage').value = '';
+        };
+
+        window.closeOrderModal = function() {
+            document.getElementById('orderModal').style.display = 'none';
+        };
+
+        // Close modals on outside click
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        };
+
+        window.exportData = function() {
+            alert('Export feature coming soon!');
+        };
+
+        window.confirmClearOrders = function() {
+            if (confirm('This will delete all completed orders older than 30 days. Continue?')) {
+                alert('Feature coming soon!');
+            }
+        };
+    </script>
+</body>
+
+</html>
