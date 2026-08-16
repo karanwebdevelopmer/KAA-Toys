@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="hi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color the Toy - KAA Toys Game</title>
+
+    <!-- Performance: Resource Hints -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+
+    <!-- Performance: Critical CSS Inline -->
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Fredoka', sans-serif;
+            background: #FFF5E6;
+            overflow-x: hidden
+        }
+    </style>
+
+    <!-- Performance: Async CSS Loading -->
+    <link rel="preload" href="styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link rel="stylesheet" href="styles.css"></noscript>
+
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"></noscript>
+
+    <style>
+        /* Game Specific Styles */
+        .game-container {
+            max-width: 1400px;
+            margin: 100px auto 50px;
+            padding: 20px;
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .game-header h1 {
+            font-size: 3rem;
+            color: #FF6B9D;
+            text-shadow: 3px 3px 0 #FFC93C, 6px 6px 0 #9FE2BF;
+            margin-bottom: 10px;
+            animation: rainbow 3s ease-in-out infinite;
+        }
+
+        @keyframes rainbow {
+
+            0%,
+            100% {
+                color: #FF6B9D;
+            }
+
+            33% {
+                color: #9FE2BF;
+            }
+
+            66% {
+                color: #FFC93C;
+            }
+        }
+
+        .game-header p {
+            font-size: 1.3rem;
+            color: #666;
+        }
+
+        .game-layout {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        /* Canvas Area */
+        .canvas-area {
+            background: white;
+            border-radius: 30px;
+            padding: 30px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+            position: relative;
+        }
+
+        #toyCanvas {
+            width: 100%;
+            height: 600px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            cursor: crosshair;
+            touch-action: none;
+        }
+
+        /* Color Panel */
+        .color-panel {
+            background: white;
+            border-radius: 30px;
+            padding: 25px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+        }
+
+        .color-panel h3 {
+            font-size: 1.5rem;
+            color: #FF6B9D;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* Basic Colors */
+        .basic-colors {
+            margin-bottom: 25px;
+        }
+
+        .basic-colors h4 {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .color-btn {
+            width: 100%;
+            aspect-ratio: 1;
+            border: 3px solid transparent;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .color-btn:hover {
+            transform: scale(1.15) translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .color-btn.active {
+            border-color: #333;
+            transform: scale(1.2);
+            box-shadow: 0 0 0 4px rgba(255, 107, 157, 0.3);
+        }
+
+        .color-btn::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5rem;
+            color: white;
+            opacity: 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .color-btn.active::after {
+            opacity: 1;
+        }
+
+        /* Color Mixer */
+        .color-mixer {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            color: white;
+        }
+
+        .color-mixer h4 {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .mixer-slots {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .mixer-slot {
+            width: 100%;
+            aspect-ratio: 1;
+            background: rgba(255, 255, 255, 0.3);
+            border: 2px dashed rgba(255, 255, 255, 0.5);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+
+        .mixer-slot.filled {
+            border: 2px solid white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .mixer-slot:hover {
+            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .mixer-result {
+            width: 100%;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.3);
+            border: 2px solid white;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .mix-btn {
+            width: 100%;
+            padding: 12px;
+            background: white;
+            color: #764ba2;
+            border: none;
+            border-radius: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        .mix-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .mix-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Custom Colors */
+        .custom-colors {
+            margin-bottom: 20px;
+        }
+
+        .custom-colors h4 {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .custom-colors-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        /* Tools */
+        .tools {
+            margin-top: 20px;
+        }
+
+        .tool-btn {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 10px;
+            border: none;
+            border-radius: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: 'Fredoka', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .tool-btn.eraser {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .tool-btn.clear {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+        }
+
+        .tool-btn.save {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .tool-btn.reset {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+        }
+
+        .tool-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Brush Size */
+        .brush-size {
+            margin: 20px 0;
+        }
+
+        .brush-size h4 {
+            font-size: 1rem;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .brush-slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 10px;
+            background: linear-gradient(to right, #667eea, #764ba2);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .brush-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: white;
+            border: 3px solid #764ba2;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .brush-size-display {
+            text-align: center;
+            margin-top: 8px;
+            font-weight: bold;
+            color: #764ba2;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 968px) {
+            .game-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .color-panel {
+                position: static;
+            }
+
+            #toyCanvas {
+                height: 400px;
+            }
+
+            .game-header h1 {
+                font-size: 2rem;
+            }
+        }
+
+        /* Floating Shapes */
+        .game-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .game-shape {
+            position: absolute;
+            font-size: 3rem;
+            opacity: 0.1;
+            animation: float 15s ease-in-out infinite;
+        }
+
+        .game-shape:nth-child(1) {
+            left: 10%;
+            top: 20%;
+            animation-delay: 0s;
+        }
+
+        .game-shape:nth-child(2) {
+            left: 80%;
+            top: 40%;
+            animation-delay: 2s;
+        }
+
+        .game-shape:nth-child(3) {
+            left: 50%;
+            top: 60%;
+            animation-delay: 4s;
+        }
+
+        .game-shape:nth-child(4) {
+            left: 20%;
+            top: 80%;
+            animation-delay: 6s;
+        }
+
+        .game-shape:nth-child(5) {
+            left: 70%;
+            top: 10%;
+            animation-delay: 8s;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-30px) rotate(180deg);
+            }
+        }
+
+        /* Success Message */
+        .success-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: white;
+            padding: 40px;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            z-index: 10000;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .success-popup.show {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .success-popup h2 {
+            font-size: 2.5rem;
+            color: #43e97b;
+            margin-bottom: 20px;
+        }
+
+        .success-popup p {
+            font-size: 1.3rem;
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Floating Background Shapes -->
+    <div class="game-shapes">
+        <div class="game-shape">🎨</div>
+        <div class="game-shape">🖌️</div>
+        <div class="game-shape">🌈</div>
+        <div class="game-shape">✨</div>
+        <div class="game-shape">🎭</div>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="logo">
+                <img src="image/file_0000000039387208a44780fb88d694e3.png" alt="KAA Toys Logo">
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="products.html">Products</a></li>
+                    <li><a href="about.html">About Us</a></li>
+                    <li><a href="order.html">Order Now</a></li>
+                    <li><a href="game.html" class="active">Game</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Contact Buttons -->
+    <div class="floating-contact">
+        <a href="https://wa.me/919288491546" class="whatsapp-btn" target="_blank">
+            <i class="fab fa-whatsapp"></i>
+        </a>
+        <a href="tel:+919288491546" class="call-btn">
+            <i class="fas fa-phone"></i>
+        </a>
+    </div>
+
+    <!-- Game Container -->
+    <div class="game-container">
+        <div class="game-header">
+            <h1>🎨 Color the Toy Game 🎨</h1>
+            <p>Apne toy ko colorful banao! Colors mix karo aur maza karo!</p>
+        </div>
+
+        <div class="game-layout">
+            <!-- Canvas Area -->
+            <div class="canvas-area">
+                <canvas id="toyCanvas"></canvas>
+            </div>
+
+            <!-- Color Panel -->
+            <div class="color-panel">
+                <h3><i class="fas fa-palette"></i> Colors</h3>
+
+                <!-- Basic Colors -->
+                <div class="basic-colors">
+                    <h4>Basic Colors</h4>
+                    <div class="color-grid" id="basicColors">
+                        <!-- Colors will be added via JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Color Mixer -->
+                <div class="color-mixer">
+                    <h4><i class="fas fa-flask"></i> Color Mixer</h4>
+                    <p style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 10px;">Click pe colors add karo</p>
+                    <div class="mixer-slots" id="mixerSlots">
+                        <div class="mixer-slot" data-slot="0"></div>
+                        <div class="mixer-slot" data-slot="1"></div>
+                        <div class="mixer-slot" data-slot="2"></div>
+                    </div>
+                    <div class="mixer-result" id="mixerResult">
+                        <span>Mixed Color</span>
+                    </div>
+                    <button class="mix-btn" id="mixBtn" disabled>
+                        <i class="fas fa-magic"></i> Mix Colors
+                    </button>
+                </div>
+
+                <!-- Custom Colors -->
+                <div class="custom-colors">
+                    <h4>Your Mixed Colors</h4>
+                    <div class="custom-colors-grid" id="customColors">
+                        <!-- Mixed colors will appear here -->
+                    </div>
+                </div>
+
+                <!-- Brush Size -->
+                <div class="brush-size">
+                    <h4>Brush Size</h4>
+                    <input type="range" min="5" max="50" value="20" class="brush-slider" id="brushSize">
+                    <div class="brush-size-display" id="brushSizeDisplay">20px</div>
+                </div>
+
+                <!-- Tools -->
+                <div class="tools">
+                    <button class="tool-btn eraser" id="eraserBtn">
+                        <i class="fas fa-eraser"></i> Eraser
+                    </button>
+                    <button class="tool-btn reset" id="resetBtn">
+                        <i class="fas fa-redo"></i> New Toy
+                    </button>
+                    <button class="tool-btn clear" id="clearBtn">
+                        <i class="fas fa-broom"></i> Clear All
+                    </button>
+                    <button class="tool-btn save" id="saveBtn">
+                        <i class="fas fa-download"></i> Save Image
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Popup -->
+    <div class="success-popup" id="successPopup">
+        <h2>🎉 Awesome! 🎉</h2>
+        <p>Aapka toy saved ho gaya!</p>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>KAA Toys</h3>
+                    <p>Play, Learn & Grow</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Contact Us</h3>
+                    <p><i class="fas fa-phone"></i> +91 9288491546</p>
+                    <p><i class="fab fa-whatsapp"></i> WhatsApp Available</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="products.html">Products</a></li>
+                        <li><a href="about.html">About Us</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 KAA Toys. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Performance Optimization Script -->
+    <script src="performance.js" defer></script>
+
+    <!-- Game Script -->
+    <script>
+        // Canvas Setup
+        const canvas = document.getElementById('toyCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Set canvas size
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth - 60;
+            canvas.height = 600;
+            drawToy();
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Color Data
+        const basicColors = [
+            '#FF0000', '#FF69B4', '#FF1493', '#FFA500',
+            '#FFFF00', '#FFD700', '#00FF00', '#32CD32',
+            '#00FFFF', '#1E90FF', '#0000FF', '#8A2BE2',
+            '#FF00FF', '#FF1493', '#A52A2A', '#000000'
+        ];
+
+        let currentColor = '#FF0000';
+        let brushSize = 20;
+        let isDrawing = false;
+        let isEraser = false;
+        let mixerColors = [null, null, null];
+        let customColorsList = [];
+
+        // Initialize Basic Colors
+        const basicColorsContainer = document.getElementById('basicColors');
+        basicColors.forEach((color, index) => {
+            const btn = document.createElement('div');
+            btn.className = 'color-btn';
+            btn.style.background = color;
+            if (index === 0) btn.classList.add('active');
+            btn.addEventListener('click', () => selectColor(color, btn));
+            basicColorsContainer.appendChild(btn);
+        });
+
+        function selectColor(color, btn) {
+            currentColor = color;
+            isEraser = false;
+            document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        // Draw 3D Toy Shape (Teddy Bear)
+        function drawToy() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw background gradient
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            gradient.addColorStop(0, '#f5f7fa');
+            gradient.addColorStop(1, '#c3cfe2');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Set white color for toy with shadow
+            ctx.fillStyle = '#FFFFFF';
+            ctx.strokeStyle = '#CCCCCC';
+            ctx.lineWidth = 3;
+
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+
+            // Shadow for 3D effect
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+            ctx.shadowBlur = 20;
+            ctx.shadowOffsetX = 10;
+            ctx.shadowOffsetY = 10;
+
+            // Body (large circle)
+            ctx.beginPath();
+            ctx.arc(centerX, centerY + 50, 100, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // Head (circle)
+            ctx.beginPath();
+            ctx.arc(centerX, centerY - 80, 80, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // Left Ear
+            ctx.beginPath();
+            ctx.arc(centerX - 60, centerY - 120, 40, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // Right Ear
+            ctx.beginPath();
+            ctx.arc(centerX + 60, centerY - 120, 40, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // Left Arm
+            ctx.beginPath();
+            ctx.ellipse(centerX - 90, centerY + 30, 30, 60, -0.3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // Right Arm
+            ctx.beginPath();
+            ctx.ellipse(centerX + 90, centerY + 30, 30, 60, 0.3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // Left Leg
+            ctx.beginPath();
+            ctx.ellipse(centerX - 50, centerY + 140, 35, 50, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // Right Leg
+            ctx.beginPath();
+            ctx.ellipse(centerX + 50, centerY + 140, 35, 50, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // Reset shadow
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
+
+            // Face details (eyes, nose, mouth)
+            ctx.fillStyle = '#333333';
+
+            // Left Eye
+            ctx.beginPath();
+            ctx.arc(centerX - 25, centerY - 90, 8, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Right Eye
+            ctx.beginPath();
+            ctx.arc(centerX + 25, centerY - 90, 8, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Nose
+            ctx.fillStyle = '#FF69B4';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY - 70, 10, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Mouth (smile)
+            ctx.strokeStyle = '#333333';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY - 60, 20, 0.2 * Math.PI, 0.8 * Math.PI);
+            ctx.stroke();
+        }
+
+        // Drawing Functions
+        function startDrawing(e) {
+            isDrawing = true;
+            draw(e);
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+            ctx.beginPath();
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX || e.touches[0].clientX) - rect.left;
+            const y = (e.clientY || e.touches[0].clientY) - rect.top;
+
+            ctx.lineWidth = brushSize;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            if (isEraser) {
+                ctx.globalCompositeOperation = 'destination-out';
+            } else {
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.strokeStyle = currentColor;
+                ctx.fillStyle = currentColor;
+            }
+
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(x, y, brushSize / 2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+        }
+
+        // Canvas Events
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+
+        // Touch Events
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            startDrawing(e);
+        });
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            draw(e);
+        });
+        canvas.addEventListener('touchend', stopDrawing);
+
+        // Mixer Slots
+        const mixerSlots = document.querySelectorAll('.mixer-slot');
+        mixerSlots.forEach((slot, index) => {
+            slot.addEventListener('click', () => {
+                if (currentColor && !isEraser) {
+                    mixerColors[index] = currentColor;
+                    slot.style.background = currentColor;
+                    slot.classList.add('filled');
+                    updateMixButton();
+                }
+            });
+        });
+
+        // Update Mix Button
+        function updateMixButton() {
+            const filledCount = mixerColors.filter(c => c !== null).length;
+            document.getElementById('mixBtn').disabled = filledCount < 2;
+        }
+
+        // Mix Colors Function
+        document.getElementById('mixBtn').addEventListener('click', () => {
+            const validColors = mixerColors.filter(c => c !== null);
+            if (validColors.length >= 2) {
+                const mixedColor = mixColors(validColors);
+                document.getElementById('mixerResult').style.background = mixedColor;
+
+                // Add to custom colors
+                if (!customColorsList.includes(mixedColor)) {
+                    customColorsList.push(mixedColor);
+                    addCustomColor(mixedColor);
+                }
+
+                // Select mixed color
+                currentColor = mixedColor;
+                document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+            }
+        });
+
+        // Mix Colors Algorithm
+        function mixColors(colors) {
+            let r = 0,
+                g = 0,
+                b = 0;
+            colors.forEach(color => {
+                const rgb = hexToRgb(color);
+                r += rgb.r;
+                g += rgb.g;
+                b += rgb.b;
+            });
+            r = Math.floor(r / colors.length);
+            g = Math.floor(g / colors.length);
+            b = Math.floor(b / colors.length);
+            return rgbToHex(r, g, b);
+        }
+
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+        }
+
+        function rgbToHex(r, g, b) {
+            return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+        }
+
+        // Add Custom Color
+        function addCustomColor(color) {
+            const customColorsContainer = document.getElementById('customColors');
+            const btn = document.createElement('div');
+            btn.className = 'color-btn';
+            btn.style.background = color;
+            btn.addEventListener('click', () => selectColor(color, btn));
+            customColorsContainer.appendChild(btn);
+        }
+
+        // Brush Size
+        const brushSlider = document.getElementById('brushSize');
+        brushSlider.addEventListener('input', (e) => {
+            brushSize = e.target.value;
+            document.getElementById('brushSizeDisplay').textContent = brushSize + 'px';
+        });
+
+        // Tools
+        document.getElementById('eraserBtn').addEventListener('click', () => {
+            isEraser = !isEraser;
+            document.getElementById('eraserBtn').style.opacity = isEraser ? '0.7' : '1';
+            document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            drawToy();
+        });
+
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawToy();
+            mixerColors = [null, null, null];
+            mixerSlots.forEach(slot => {
+                slot.style.background = 'rgba(255, 255, 255, 0.3)';
+                slot.classList.remove('filled');
+            });
+            document.getElementById('mixerResult').style.background = 'rgba(255, 255, 255, 0.3)';
+            updateMixButton();
+        });
+
+        document.getElementById('saveBtn').addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.download = 'my-colored-toy.png';
+            link.href = canvas.toDataURL();
+            link.click();
+
+            // Show success popup
+            const popup = document.getElementById('successPopup');
+            popup.classList.add('show');
+            setTimeout(() => {
+                popup.classList.remove('show');
+            }, 2000);
+        });
+
+        // Initial Draw
+        drawToy();
+    </script>
+</body>
+
+</html>
