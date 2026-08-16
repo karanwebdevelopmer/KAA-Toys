@@ -5,11 +5,64 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Products - KAA Toys</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- Performance: Resource Hints -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="dns-prefetch" href="https://www.gstatic.com">
+    <link rel="dns-prefetch" href="https://sr-toys-53640-default-rtdb.firebaseio.com">
+
+    <!-- Performance: Critical CSS Inline -->
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Fredoka', sans-serif;
+            background: #FFF5E6;
+            overflow-x: hidden
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px
+        }
+
+        .loading-message {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2rem;
+            color: #666
+        }
+    </style>
+
+    <!-- Performance: Async CSS Loading -->
+    <link rel="preload" href="styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link rel="stylesheet" href="styles.css"></noscript>
+
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"></noscript>
 </head>
 
 <body>
+    <!-- Floating Background Shapes -->
+    <div class="floating-shapes">
+        <div class="shape">🚂</div>
+        <div class="shape">🎯</div>
+        <div class="shape">🎪</div>
+    </div>
+
     <!-- Header -->
     <header>
         <div class="container">
@@ -22,6 +75,7 @@
                     <li><a href="products.html" class="active">Products</a></li>
                     <li><a href="about.html">About Us</a></li>
                     <li><a href="order.html">Order Now</a></li>
+                    <li><a href="game.html">Game</a></li>
                 </ul>
             </nav>
         </div>
@@ -85,10 +139,13 @@
 </html>
 
 
+<!-- Performance Optimization Script -->
+<script src="performance.js" defer></script>
+
 <!-- Firebase Integration -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBftHnG49-KBBlq5NlMomKnCmH9kuE75O8",
@@ -104,43 +161,48 @@
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
-        // Cache products in localStorage for faster loading
-        const CACHE_KEY = 'sr_toys_products_cache';
-        const CACHE_TIME_KEY = 'sr_toys_products_cache_time';
+        // Cache products using IndexedDB (better performance)
+        const CACHE_KEY = 'products_data';
         const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
-        // Load products from Firebase
-        function loadProducts() {
+        // Load products from Firebase with caching
+        async function loadProducts() {
             const productsGrid = document.getElementById('productsGrid');
             
-            // Check cache first
-            const cachedData = localStorage.getItem(CACHE_KEY);
-            const cacheTime = localStorage.getItem(CACHE_TIME_KEY);
-            const now = Date.now();
-            
-            if (cachedData && cacheTime && (now - parseInt(cacheTime)) < CACHE_DURATION) {
-                // Use cached data for instant loading
-                displayProducts(JSON.parse(cachedData));
+            // Try to load from IndexedDB cache first
+            if (window.SRToysPerformance && window.SRToysPerformance.CacheDB) {
+                const cachedProducts = await window.SRToysPerformance.CacheDB.get(CACHE_KEY, CACHE_DURATION);
+                if (cachedProducts) {
+                    displayProducts(cachedProducts);
+                    return; // Use cache, no need to fetch
+                }
             }
             
-            // Fetch fresh data from Firebase
-            onValue(ref(database, 'products'), (snapshot) => {
+            // If no cache, fetch from Firebase (one-time read)
+            try {
+                const snapshot = await get(ref(database, 'products'));
                 const products = snapshot.val();
                 
-                // Cache the data
-                if (products) {
-                    localStorage.setItem(CACHE_KEY, JSON.stringify(products));
-                    localStorage.setItem(CACHE_TIME_KEY, now.toString());
+                // Cache the data in IndexedDB
+                if (products && window.SRToysPerformance && window.SRToysPerformance.CacheDB) {
+                    await window.SRToysPerformance.CacheDB.set(CACHE_KEY, products);
                 }
                 
                 displayProducts(products);
-            }, { onlyOnce: false }); // Listen for real-time updates
+            } catch (error) {
+                console.error('Error loading products:', error);
+                productsGrid.innerHTML = '<div class="no-products"><p>Error loading products. Please refresh.</p></div>';
+            }
         }
 
         function displayProducts(products) {
             const productsGrid = document.getElementById('productsGrid');
             
             if (products) {
+                // Use document fragment for better performance
+                const fragment = document.createDocumentFragment();
+                const tempDiv = document.createElement('div');
+                
                 let html = '';
                 Object.entries(products).forEach(([id, product]) => {
                     const isOutOfStock = product.stock === 'Out of Stock';
@@ -148,7 +210,7 @@
                     
                     // Use image if available, otherwise use icon
                     const productDisplay = product.image ? 
-                        `<div class="product-image-container"><img src="${product.image}" alt="${product.name}" class="product-img" loading="lazy"></div>` :
+                        `<div class="product-image-container"><img src="${product.image}" alt="${product.name}" class="product-img" loading="lazy" decoding="async"></div>` :
                         `<div class="product-image"><i class="${product.icon}"></i></div>`;
                     
                     html += `
@@ -164,13 +226,30 @@
                         </div>
                     `;
                 });
-                productsGrid.innerHTML = html;
+                
+                // Single DOM update
+                tempDiv.innerHTML = html;
+                while (tempDiv.firstChild) {
+                    fragment.appendChild(tempDiv.firstChild);
+                }
+                productsGrid.innerHTML = '';
+                productsGrid.appendChild(fragment);
+                
+                // Initialize lazy loading for images
+                if (window.SRToysPerformance && window.SRToysPerformance.lazyLoadImages) {
+                    window.SRToysPerformance.lazyLoadImages();
+                }
             } else {
                 productsGrid.innerHTML = '<div class="no-products"><p>No products available at the moment.</p></div>';
             }
         }
 
-        loadProducts();
+        // Load products when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadProducts);
+        } else {
+            loadProducts();
+        }
     </script>
 </body>
 
